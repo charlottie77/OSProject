@@ -792,15 +792,67 @@ printf(decrypt);
 
 void ASand()
 {
+	printf("Caesar's code ! Please input 3 strings :\nyour original message, your gap, and your purpose(encode/decode).\n");
+	while(1){
+		printf("\nStart !\n");
+		char message[255];
+		char gap[20];
+		char purpose[20];
 
-	TTY *p_tty=tty_table+5;
-	p_tty->startScanf=0;
-	char strrrrr[30];
-	printf("aaaaaaa");
-	openStartScanf(p_tty);
-	while (p_tty->startScanf) ;
-	mystrncpy(strrrrr,p_tty->str,30);
-	printf(strrrrr);
-	while(1);
+		char strrrrr[255];
 
+		TTY *p_tty=tty_table+5;
+		p_tty->startScanf=0;
+		strrrrr[255];
+		openStartScanf(p_tty);
+		while (p_tty->startScanf) ;
+		mystrncpy(message,p_tty->str,255);
+		//printf(message);
+
+		p_tty=tty_table+5;
+		p_tty->startScanf=0;
+		strrrrr[255];
+		openStartScanf(p_tty);
+		while (p_tty->startScanf) ;
+		mystrncpy(gap,p_tty->str,20);
+		//printf(gap);
+
+		p_tty=tty_table+5;
+		p_tty->startScanf=0;
+		strrrrr[255];
+		openStartScanf(p_tty);
+		while (p_tty->startScanf) ;
+		mystrncpy(purpose,p_tty->str,20);
+		//printf(purpose);
+
+		int i=0;
+		int gapInt=0;
+		for(i=0;i<5;i++){
+			if(gap[i]>='0'&&gap[i]<='9')
+				gapInt=gapInt*10+gap[i]-'0';
+			else
+				break;
+		}
+		gapInt=gapInt%26;
+		strlwr(message);
+
+		int purp=0;
+		if(purpose[0]=='d'||purpose[0]=='D')
+			purp=1;
+		else
+			purp=-1;
+		
+		for(i=0;i<255;i++){
+			if(message[i]=='\0')
+				break;
+			int tmp=message[i]+purp*gapInt;
+			if(tmp>'z'||tmp<'a')
+				tmp=tmp-purp*26;
+			message[i]=tmp;
+		}
+
+		printf("Your Result : ");
+		printf(message);
+		printf("\n");
+	}
 }
