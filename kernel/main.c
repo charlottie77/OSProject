@@ -184,7 +184,7 @@ PUBLIC int tinix_main()
 	proc_table[3].nr_tty = 1;
 	proc_table[4].nr_tty = 1;
 	proc_table[5].nr_tty = 1;
-	proc_table[6].nr_tty = 2;
+	proc_table[6].nr_tty = 4;
 	proc_table[7].nr_tty = 5;
 
 	k_reenter	= 0;
@@ -743,7 +743,7 @@ void Yume()
 	while(1){
 		printf("Please Input Your String:\n");
 		char s[255];
-		TTY *p_tty=tty_table+2;
+		TTY *p_tty=tty_table+4;
 		p_tty->startScanf=0;
 		openStartScanf(p_tty);
 		while (p_tty->startScanf) ;
