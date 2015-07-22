@@ -15,6 +15,15 @@
 #include "global.h"
 #include "proto.h"
 
+/*TTY *mytty=tty_table+3;
+char mytty_cmd[255];
+char myGetChar(){
+	openStartScanf(mytty);
+	while (mytty->startScanf) ;
+	//mystrncpy(mytty_cmd,lalala->str,255);
+	return mytty->str[0];
+}*/
+
 int strcmp(char *str1,char *str2)
 {
 	int i;
@@ -27,6 +36,12 @@ int strcmp(char *str1,char *str2)
 	return 0;
 }
 
+void display(int z[5][5])
+{
+	//clearScreen();
+	printf(" ---- ---- ---- ----\n");
+}
+
 void strlwr(char *str)
 {
 	int i;
@@ -35,6 +50,24 @@ void strlwr(char *str)
 		if ('A'<=str[i] && str[i]<='Z') str[i]=str[i]+'a'-'A';
 	}
 }
+
+char *mystrncpy(char *dest,const char *src,int n)  
+{  	
+    char *strDest=dest;  
+    //assert((dest!=NULL)&&(src!=NULL));  
+    while( n &&(*dest++=*src++)!='\0')  
+    {  
+        n--;  
+    }  
+    if (n)  
+    {  
+        while(--n)  
+        {  
+            *dest++='\0';  
+        }  
+    }  
+    return strDest;  
+} 
 
 void addToQueue(PROCESS* p)
 {
@@ -176,6 +209,21 @@ void clearScreen()
 	disp_pos=0;
 }
 
+PUBLIC void clear_screen(int pos, int len)
+{
+	u8 * pch = (u8*)(V_MEM_BASE + pos * 2);
+	while (--len >= 0) {
+		*pch++ = ' ';
+		*pch++ = DEFAULT_CHAR_COLOR;
+	}
+}
+void clear()
+{
+	clear_screen(0,console_table[current_console].cursor);
+	console_table[current_console].crtc_start = 0;
+	console_table[current_console].cursor = 0;
+	
+}
 
 void help()
 {
@@ -371,18 +419,31 @@ void TestE()
 
 void Yume()
 {
-	while(1)
+	/*while(1)
 	{
-		printf("Yume..");
-		milli_delay(1000);
+		//printf("Yume..");
+		int a[5][5]={0}; 
+		display(a);
+		milli_delay(2000);
+	}*/
+	while(1){
+		static int i=0;
+		printf("%d\n",i++ );
 	}
 }
+
 
 void ASand()
 {
-	while(1)
-	{
-		printf("A SAND COUNTY ALMANAC....");
-	}
-}
 
+	TTY *p_tty=tty_table+5;
+	p_tty->startScanf=0;
+	char strrrrr[30];
+	printf("aaaaaaa");
+	openStartScanf(p_tty);
+	while (p_tty->startScanf) ;
+	mystrncpy(strrrrr,p_tty->str,30);
+	printf(strrrrr);
+	while(1);
+
+}

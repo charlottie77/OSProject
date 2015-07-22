@@ -15,6 +15,15 @@
 #include "global.h"
 #include "proto.h"
 
+/*TTY *mytty=tty_table+3;
+char mytty_cmd[255];
+char myGetChar(){
+	openStartScanf(mytty);
+	while (mytty->startScanf) ;
+	//mystrncpy(mytty_cmd,lalala->str,255);
+	return mytty->str[0];
+}*/
+
 int strcmp(char *str1,char *str2)
 {
 	int i;
@@ -27,6 +36,12 @@ int strcmp(char *str1,char *str2)
 	return 0;
 }
 
+void display(int z[5][5])
+{
+	//clearScreen();
+	printf(" ---- ---- ---- ----\n");
+}
+
 void strlwr(char *str)
 {
 	int i;
@@ -35,6 +50,24 @@ void strlwr(char *str)
 		if ('A'<=str[i] && str[i]<='Z') str[i]=str[i]+'a'-'A';
 	}
 }
+
+char *mystrncpy(char *dest,const char *src,int n)  
+{  
+    char *strDest=dest;  
+    //assert((dest!=NULL)&&(src!=NULL));  
+    while( n &&(*dest++=*src++)!='\0')  
+    {  
+        n--;  
+    }  
+    if (n)  
+    {  
+        while(--n)  
+        {  
+            *dest++='\0';  
+        }  
+    }  
+    return strDest;  
+} 
 
 void addToQueue(PROCESS* p)
 {
@@ -136,6 +169,7 @@ PUBLIC int tinix_main()
 	proc_table[4].priority =  7;
 	proc_table[5].priority =  10;
 	proc_table[6].priority =  10;
+	proc_table[7].priority =  10;
 
 	//对优先队列初始化
 	firstLen=firstHead=secondLen=0;
@@ -150,6 +184,7 @@ PUBLIC int tinix_main()
 	proc_table[4].nr_tty = 1;
 	proc_table[5].nr_tty = 1;
 	proc_table[6].nr_tty = 2;
+	proc_table[7].nr_tty = 5;
 
 	k_reenter	= 0;
 	ticks		= 0;
@@ -371,8 +406,25 @@ void Yume()
 {
 	while(1)
 	{
-		printf("Yume..");
-		milli_delay(1000);
+		//printf("Yume..");
+		int a[5][5]={0}; 
+		display(a);
+		milli_delay(2000);
 	}
 }
 
+
+void ASand()
+{
+
+	TTY *p_tty=tty_table+5;
+	p_tty->startScanf=0;
+	char strrrrr[30];
+	printf("aaaaaaa");
+	openStartScanf(p_tty);
+	while (p_tty->startScanf) ;
+	mystrncpy(strrrrr,p_tty->str,30);
+	printf(strrrrr);
+	while(1);
+
+}

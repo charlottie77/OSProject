@@ -58,10 +58,11 @@ disasm :
 # Write "boot.bin" & "loader.bin" into floppy image "TINIX.IMG"
 # We assume that "TINIX.IMG" exists in current folder
 buildimg :
-	mount TINIX.IMG /tmp/Tinix -o loop
-	cp -f boot/loader.bin /tmp/Tinix/
-	cp -f kernel.bin /tmp/Tinix
-	umount  /tmp/Tinix
+	mount -o loop TINIX.IMG /mnt/floppy
+	cp -f boot/loader.bin /mnt/floppy/
+	cp -f kernel.bin /mnt/floppy/
+	umount  /mnt/floppy/
+	bochs -f bochsrc.bxrc
 
 boot/boot.bin : boot/boot.asm boot/include/load.inc boot/include/fat12hdr.inc
 	$(ASM) $(ASMBFLAGS) -o $@ $<

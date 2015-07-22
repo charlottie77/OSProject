@@ -6,7 +6,7 @@
 megs: 32
 
 # filename of ROM images
-romimage: file=$BXSHARE/BIOS-bochs-latest
+romimage: file=/usr/local/share/bochs/BIOS-bochs-latest
 vgaromimage: file=/usr/share/vgabios/vgabios.bin
 
 # what disk images will be used 
@@ -22,5 +22,5 @@ log: bochsout.txt
 mouse: enabled=0
 
 # enable key mapping, using US layout as default.
-keyboard_mapping: enabled=1, map=$BXSHARE/keymaps/sdl-pc-us.map
-display_library:sdl
+keyboard:keymap=$BXSHARE/keymaps/x11-pc-us.map
+#display_library:sdl
