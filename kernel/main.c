@@ -14,6 +14,7 @@
 #include "console.h"
 #include "global.h"
 #include "proto.h"
+#include "md5.h"
 
 /*TTY *mytty=tty_table+3;
 char mytty_cmd[255];
@@ -401,391 +402,6 @@ void TestE()
 		milli_delay(1000);
 	}
 }
-//----------------------------------------------
-/*                 md5.h           */
-#ifndef _MD5_H_
-#define _MD5_H_
-
-#define R_memset(x, y, z) memset(x, y, z)
-#define R_memcpy(x, y, z) memcpy(x, y, z)
-#define R_memcmp(x, y, z) memcmp(x, y, z)
-
-typedef unsigned long UINT4;
-typedef unsigned char *POINTER;
-
-/* MD5 context. */
-typedef struct {
-  /* state (ABCD) */   
-  /*四个32bits数，用于存放最终计算得到的消息摘要。当消息长度〉512bits时，也用于存放每个512bits的中间结果*/ 
-  UINT4 state[4];   
-
-  /* number of bits, modulo 2^64 (lsb first) */    
-  /*存储原始信息的bits数长度,不包括填充的bits，最长为 2^64 bits，因为2^64是一个64位数的最大值*/
-  UINT4 count[2];
-  
-  /* input buffer */ 
-  /*存放输入的信息的缓冲区，512bits*/
-  unsigned char buffer[64];  
-} MD5_CTX;
-
-void MD5Init(MD5_CTX *);
-void MD5Update(MD5_CTX *, unsigned char *, unsigned int);
-void MD5Final(unsigned char [16], MD5_CTX *);
-
-#endif /* _MD5_H_ */
-
-
-///////////////////////////////////////////////////////////////////////////
-
-/*    md5.cpp   */
-
-
-/* Constants for MD5Transform routine. */
-/*md5转换用到的常量，算法本身规定的*/
-#define S11 7
-#define S12 12
-#define S13 17
-#define S14 22
-#define S21 5
-#define S22 9
-#define S23 14
-#define S24 20
-#define S31 4
-#define S32 11
-#define S33 16
-#define S34 23
-#define S41 6
-#define S42 10
-#define S43 15
-#define S44 21
-
-static void MD5Transform(UINT4 [4], unsigned char [64]);
-static void Encode(unsigned char *, UINT4 *, unsigned int);
-static void Decode(UINT4 *, unsigned char *, unsigned int);
-
-/*
-用于bits填充的缓冲区，为什么要64个字节呢？因为当欲加密的信息的bits数被512除其余数为448时，
-需要填充的bits的最大值为512=64*8 。
-*/
-static unsigned char PADDING[64] = {
-  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
- 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-/*
-接下来的这几个宏定义是md5算法规定的，就是对信息进行md5加密都要做的运算。
-据说有经验的高手跟踪程序时根据这几个特殊的操作就可以断定是不是用的md5
-*/
-/* F, G, H and I are basic MD5 functions.
- */
-#define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
-#define G(x, y, z) (((x) & (z)) | ((y) & (~z)))
-#define H(x, y, z) ((x) ^ (y) ^ (z))
-#define I(x, y, z) ((y) ^ ((x) | (~z)))
-
-/* ROTATE_LEFT rotates x left n bits.
- */
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
-
-/* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
-  Rotation is separate from addition to prevent recomputation.
- */
-#define FF(a, b, c, d, x, s, ac) { \
-  (a) += F ((b), (c), (d)) + (x) + (UINT4)(ac); \
-  (a) = ROTATE_LEFT ((a), (s)); \
-  (a) += (b); \
- }
-#define GG(a, b, c, d, x, s, ac) { \
-  (a) += G ((b), (c), (d)) + (x) + (UINT4)(ac); \
-  (a) = ROTATE_LEFT ((a), (s)); \
-  (a) += (b); \
- }
-#define HH(a, b, c, d, x, s, ac) { \
-  (a) += H ((b), (c), (d)) + (x) + (UINT4)(ac); \
-  (a) = ROTATE_LEFT ((a), (s)); \
-  (a) += (b); \
- }
-#define II(a, b, c, d, x, s, ac) { \
-  (a) += I ((b), (c), (d)) + (x) + (UINT4)(ac); \
-  (a) = ROTATE_LEFT ((a), (s)); \
-  (a) += (b); \
- }
-
-/* MD5 initialization. Begins an MD5 operation, writing a new context. */
-/*初始化md5的结构*/
-void MD5Init (MD5_CTX *context)
-{
-  /*将当前的有效信息的长度设成0,这个很简单,还没有有效信息,长度当然是0了*/
-  context->count[0] = context->count[1] = 0;
-
-  /* Load magic initialization constants.*/
-  /*初始化链接变量，算法要求这样，这个没法解释了*/
-  context->state[0] = 0x67452301;
-  context->state[1] = 0xefcdab89;
-  context->state[2] = 0x98badcfe;
-  context->state[3] = 0x10325476;
-}
-
-/* MD5 block update operation. Continues an MD5 message-digest
-  operation, processing another message block, and updating the
-  context. */
-/*将与加密的信息传递给md5结构，可以多次调用
-context：初始化过了的md5结构
-input：欲加密的信息，可以任意长
-inputLen：指定input的长度
-*/
-void MD5Update(MD5_CTX *context,unsigned char * input,unsigned int  inputLen)
-{
- unsigned int i, index, partLen;
- 
-
- /* Compute number of bytes mod 64 */
- /*计算已有信息的bits长度的字节数的模64, 64bytes=512bits。
- 用于判断已有信息加上当前传过来的信息的总长度能不能达到512bits，
- 如果能够达到则对凑够的512bits进行一次处理*/
- index = (unsigned int)((context->count[0] >> 3) & 0x3F);
-
- /* Update number of bits *//*更新已有信息的bits长度*/
- if((context->count[0] += ((UINT4)inputLen << 3)) < ((UINT4)inputLen << 3))
-  context->count[1]++;
- context->count[1] += ((UINT4)inputLen >> 29);
-
- /*计算已有的字节数长度还差多少字节可以 凑成64的整倍数*/
- partLen = 64 - index;
-
- /* Transform as many times as possible.
-  */
- /*如果当前输入的字节数 大于 已有字节数长度补足64字节整倍数所差的字节数*/
- if(inputLen >= partLen) 
-    {
-  /*用当前输入的内容把context->buffer的内容补足512bits*/
-  R_memcpy((POINTER)&context->buffer[index], (POINTER)input, partLen);
-  /*用基本函数对填充满的512bits（已经保存到context->buffer中） 做一次转换，转换结果保存到context->state中*/
-  MD5Transform(context->state, context->buffer);
-
- /*
- 对当前输入的剩余字节做转换（如果剩余的字节<在输入的input缓冲区中>大于512bits的话 ），
- 转换结果保存到context->state中
- */
-  for(i = partLen; i + 63 < inputLen; i += 64)/*把i+63<inputlen改为i+64<=inputlen更容易理解*/
-   MD5Transform(context->state, &input[i]);
-
-        index = 0;
-    }
-    else
-  i = 0;
-
- /* Buffer remaining input */
- /*将输入缓冲区中的不足填充满512bits的剩余内容填充到context->buffer中，留待以后再作处理*/
- R_memcpy((POINTER)&context->buffer[index], (POINTER)&input[i], inputLen-i);
-}
-
-/* MD5 finalization. Ends an MD5 message-digest operation, writing the
-  the message digest and zeroizing the context. */
-/*获取加密 的最终结果
-digest：保存最终的加密串
-context：你前面初始化并填入了信息的md5结构
-*/
-void MD5Final (unsigned char digest[16],MD5_CTX *context)
-{
- unsigned char bits[8];
- unsigned int index, padLen;
-
- /* Save number of bits */
- /*将要被转换的信息(所有的)的bits长度拷贝到bits中*/
- Encode(bits, context->count, 8);
-
- /* Pad out to 56 mod 64. */
- /* 计算所有的bits长度的字节数的模64, 64bytes=512bits*/
- index = (unsigned int)((context->count[0] >> 3) & 0x3f);
- /*计算需要填充的字节数，padLen的取值范围在1-64之间*/
- padLen = (index < 56) ? (56 - index) : (120 - index);
- /*这一次函数调用绝对不会再导致MD5Transform的被调用，因为这一次不会填满512bits*/
- MD5Update(context, PADDING, padLen);
-
- /* Append length (before padding) */
- /*补上原始信息的bits长度（bits长度固定的用64bits表示），这一次能够恰巧凑够512bits，不会多也不会少*/
- MD5Update(context, bits, 8);
-
- /* Store state in digest */
- /*将最终的结果保存到digest中。ok，终于大功告成了*/
- Encode(digest, context->state, 16);
-
- /* Zeroize sensitive information. */
-
- R_memset((POINTER)context, 0, sizeof(*context));
-}
-
-/* MD5 basic transformation. Transforms state based on block. */
-/*
-对512bits信息(即block缓冲区)进行一次处理，每次处理包括四轮
-state[4]：md5结构中的state[4]，用于保存对512bits信息加密的中间结果或者最终结果
-block[64]：欲加密的512bits信息
-*/
-static void MD5Transform (UINT4 state[4], unsigned char block[64])
-{
- UINT4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
-
- Decode(x, block, 64);
-
- /* Round 1 */
- FF(a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
- FF(d, a, b, c, x[ 1], S12, 0xe8c7b756); /* 2 */
- FF(c, d, a, b, x[ 2], S13, 0x242070db); /* 3 */
- FF(b, c, d, a, x[ 3], S14, 0xc1bdceee); /* 4 */
- FF(a, b, c, d, x[ 4], S11, 0xf57c0faf); /* 5 */
- FF(d, a, b, c, x[ 5], S12, 0x4787c62a); /* 6 */
- FF(c, d, a, b, x[ 6], S13, 0xa8304613); /* 7 */
- FF(b, c, d, a, x[ 7], S14, 0xfd469501); /* 8 */
- FF(a, b, c, d, x[ 8], S11, 0x698098d8); /* 9 */
- FF(d, a, b, c, x[ 9], S12, 0x8b44f7af); /* 10 */
- FF(c, d, a, b, x[10], S13, 0xffff5bb1); /* 11 */
- FF(b, c, d, a, x[11], S14, 0x895cd7be); /* 12 */
- FF(a, b, c, d, x[12], S11, 0x6b901122); /* 13 */
- FF(d, a, b, c, x[13], S12, 0xfd987193); /* 14 */
- FF(c, d, a, b, x[14], S13, 0xa679438e); /* 15 */
- FF(b, c, d, a, x[15], S14, 0x49b40821); /* 16 */
-
- /* Round 2 */
- GG(a, b, c, d, x[ 1], S21, 0xf61e2562); /* 17 */
- GG(d, a, b, c, x[ 6], S22, 0xc040b340); /* 18 */
- GG(c, d, a, b, x[11], S23, 0x265e5a51); /* 19 */
- GG(b, c, d, a, x[ 0], S24, 0xe9b6c7aa); /* 20 */
- GG(a, b, c, d, x[ 5], S21, 0xd62f105d); /* 21 */
- GG(d, a, b, c, x[10], S22,  0x2441453); /* 22 */
- GG(c, d, a, b, x[15], S23, 0xd8a1e681); /* 23 */
- GG(b, c, d, a, x[ 4], S24, 0xe7d3fbc8); /* 24 */
- GG(a, b, c, d, x[ 9], S21, 0x21e1cde6); /* 25 */
- GG(d, a, b, c, x[14], S22, 0xc33707d6); /* 26 */
- GG(c, d, a, b, x[ 3], S23, 0xf4d50d87); /* 27 */
- GG(b, c, d, a, x[ 8], S24, 0x455a14ed); /* 28 */
- GG(a, b, c, d, x[13], S21, 0xa9e3e905); /* 29 */
- GG(d, a, b, c, x[ 2], S22, 0xfcefa3f8); /* 30 */
- GG(c, d, a, b, x[ 7], S23, 0x676f02d9); /* 31 */
- GG(b, c, d, a, x[12], S24, 0x8d2a4c8a); /* 32 */
-
- /* Round 3 */
- HH(a, b, c, d, x[ 5], S31, 0xfffa3942); /* 33 */
- HH(d, a, b, c, x[ 8], S32, 0x8771f681); /* 34 */
- HH(c, d, a, b, x[11], S33, 0x6d9d6122); /* 35 */
- HH(b, c, d, a, x[14], S34, 0xfde5380c); /* 36 */
- HH(a, b, c, d, x[ 1], S31, 0xa4beea44); /* 37 */
- HH(d, a, b, c, x[ 4], S32, 0x4bdecfa9); /* 38 */
- HH(c, d, a, b, x[ 7], S33, 0xf6bb4b60); /* 39 */
- HH(b, c, d, a, x[10], S34, 0xbebfbc70); /* 40 */
- HH(a, b, c, d, x[13], S31, 0x289b7ec6); /* 41 */
- HH(d, a, b, c, x[ 0], S32, 0xeaa127fa); /* 42 */
- HH(c, d, a, b, x[ 3], S33, 0xd4ef3085); /* 43 */
- HH(b, c, d, a, x[ 6], S34,  0x4881d05); /* 44 */
- HH(a, b, c, d, x[ 9], S31, 0xd9d4d039); /* 45 */
- HH(d, a, b, c, x[12], S32, 0xe6db99e5); /* 46 */
- HH(c, d, a, b, x[15], S33, 0x1fa27cf8); /* 47 */
- HH(b, c, d, a, x[ 2], S34, 0xc4ac5665); /* 48 */
-
- /* Round 4 */
- II(a, b, c, d, x[ 0], S41, 0xf4292244); /* 49 */
- II(d, a, b, c, x[ 7], S42, 0x432aff97); /* 50 */
- II(c, d, a, b, x[14], S43, 0xab9423a7); /* 51 */
- II(b, c, d, a, x[ 5], S44, 0xfc93a039); /* 52 */
- II(a, b, c, d, x[12], S41, 0x655b59c3); /* 53 */
- II(d, a, b, c, x[ 3], S42, 0x8f0ccc92); /* 54 */
- II(c, d, a, b, x[10], S43, 0xffeff47d); /* 55 */
- II(b, c, d, a, x[ 1], S44, 0x85845dd1); /* 56 */
- II(a, b, c, d, x[ 8], S41, 0x6fa87e4f); /* 57 */
- II(d, a, b, c, x[15], S42, 0xfe2ce6e0); /* 58 */
- II(c, d, a, b, x[ 6], S43, 0xa3014314); /* 59 */
- II(b, c, d, a, x[13], S44, 0x4e0811a1); /* 60 */
- II(a, b, c, d, x[ 4], S41, 0xf7537e82); /* 61 */
- II(d, a, b, c, x[11], S42, 0xbd3af235); /* 62 */
- II(c, d, a, b, x[ 2], S43, 0x2ad7d2bb); /* 63 */
- II(b, c, d, a, x[ 9], S44, 0xeb86d391); /* 64 */
-
- state[0] += a;
- state[1] += b;
- state[2] += c;
- state[3] += d;
-
- /* Zeroize sensitive information. */
- R_memset((POINTER)x, 0, sizeof(x));
-}
-
-/* Encodes input (UINT4) into output (unsigned char). Assumes len is
-  a multiple of 4. */
-/*将4字节的整数copy到字符形式的缓冲区中
-output：用于输出的字符缓冲区
-input：欲转换的四字节的整数形式的数组
-len：output缓冲区的长度，要求是4的整数倍
-*/
-static void Encode(unsigned char *output, UINT4 *input,unsigned int  len)
-{
- unsigned int i, j;
-
- for(i = 0, j = 0; j < len; i++, j += 4) {
-  output[j] = (unsigned char)(input[i] & 0xff);
-  output[j+1] = (unsigned char)((input[i] >> 8) & 0xff);
-  output[j+2] = (unsigned char)((input[i] >> 16) & 0xff);
-  output[j+3] = (unsigned char)((input[i] >> 24) & 0xff);
- }
-}
-
-/* Decodes input (unsigned char) into output (UINT4). Assumes len is
-  a multiple of 4. */
-/*与上面的函数正好相反，这一个把字符形式的缓冲区中的数据copy到4字节的整数中（即以整数形式保存）
-output：保存转换出的整数
-input：欲转换的字符缓冲区
-len：输入的字符缓冲区的长度，要求是4的整数倍
-*/
-static void Decode(UINT4 *output, unsigned char *input,unsigned int  len)
-{
- unsigned int i, j;
-
- for(i = 0, j = 0; j < len; i++, j += 4)
-  output[i] = ((UINT4)input[j]) | (((UINT4)input[j+1]) << 8) |
-   (((UINT4)input[j+2]) << 16) | (((UINT4)input[j+3]) << 24);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-// md5test.cpp : Defines the entry point for the console application.
-//
-
-
-void Yume()
-{
- MD5_CTX md5;
- MD5Init(&md5);                         //初始化用于md5加密的结构
- 
- unsigned char encrypt[200];     //存放于加密的信息
- unsigned char decrypt[200];       //存放加密后的结果
- TTY *p_tty=tty_table+2;
- p_tty->startScanf=0;  
- openStartScanf(p_tty);
- while (p_tty->startScanf) ;
- printf("p_tty ");
- printf(p_tty->str);
- printf("\n");
- mystrncpy(encrypt,p_tty->str,200);             //输入加密的字符
- printf("en ");
- printf(encrypt);
- printf("\n");
- MD5Update(&md5,encrypt,strlen((char *)encrypt));   //对欲加密的字符进行加密
-
- MD5Final(decrypt,&md5);                                            //获得最终结果
- 
- printf("before:%s\n after:",encrypt);
-int a=0;
- /*for(a=0;a<16;a++)
-{
-  printf("  ");
-  printf(decrypt);
-}*/
-printf(decrypt);
- 
- printf("\n\n\nFinished!\n");
- 
-}
 
 /*  以上代码在vc6下编译通过，运行正常，能够得到正确的md5值  */
 //---------------------------------------------
@@ -854,5 +470,301 @@ void ASand()
 		printf("Your Result : ");
 		printf(message);
 		printf("\n");
+	}
+}
+
+
+//md5
+
+/*
+* Note: this code is harmless on little-endian machines.
+*/
+void byteReverse(buf, longs)
+    unsigned char *buf; unsigned longs;
+{
+    uint32 t;
+    do {
+    t = (uint32) ((unsigned) buf[3] << 8 | buf[2]) << 16 |
+        ((unsigned) buf[1] << 8 | buf[0]);
+    *(uint32 *) buf = t;
+    buf += 4;
+    } while (--longs);
+}
+
+void MD5Init(ctx)
+    struct MD5Context *ctx;
+{
+    ctx->buf[0] = 0x67452301;
+    ctx->buf[1] = 0xefcdab89;
+    ctx->buf[2] = 0x98badcfe;
+    ctx->buf[3] = 0x10325476;
+
+    ctx->bits[0] = 0;
+    ctx->bits[1] = 0;
+}
+
+/*
+* Update context to reflect the concatenation of another buffer full
+* of bytes.
+*/
+void MD5Update(ctx, buf, len)
+    struct MD5Context *ctx; unsigned char *buf; unsigned len;
+{
+    uint32 t;
+
+    /* Update bitcount */
+
+    t = ctx->bits[0];
+    if ((ctx->bits[0] = t + ((uint32) len << 3)) < t)
+    ctx->bits[1]++;     /* Carry from low to high */
+    ctx->bits[1] += len >> 29;
+
+    t = (t >> 3) & 0x3f;    /* Bytes already in shsInfo->data */
+
+    /* Handle any leading odd-sized chunks */
+
+    if (t) {
+    unsigned char *p = (unsigned char *) ctx->in + t;
+
+    t = 64 - t;
+    if (len < t) {
+        memcpy(p, buf, len);
+        return;
+    }
+    memcpy(p, buf, t);
+    byteReverse(ctx->in, 16);
+    MD5Transform(ctx->buf, (uint32 *) ctx->in);
+    buf += t;
+    len -= t;
+    }
+    /* Process data in 64-byte chunks */
+
+    while (len >= 64) {
+    memcpy(ctx->in, buf, 64);
+    byteReverse(ctx->in, 16);
+    MD5Transform(ctx->buf, (uint32 *) ctx->in);
+    buf += 64;
+    len -= 64;
+    }
+
+    /* Handle any remaining bytes of data. */
+
+    memcpy(ctx->in, buf, len);
+}
+
+/*
+* Final wrapup - pad to 64-byte boundary with the bit pattern
+* 1 0* (64-bit count of bits processed, MSB-first)
+*/
+void MD5Final(digest, ctx)
+    unsigned char digest[16]; struct MD5Context *ctx;
+{
+    unsigned count;
+    unsigned char *p;
+
+    /* Compute number of bytes mod 64 */
+    count = (ctx->bits[0] >> 3) & 0x3F;
+
+    /* Set the first char of padding to 0x80. This is safe since there is
+       always at least one byte free */
+    p = ctx->in + count;
+    *p++ = 0x80;
+
+    /* Bytes of padding needed to make 64 bytes */
+    count = 64 - 1 - count;
+
+    /* Pad out to 56 mod 64 */
+    if (count < 8) {
+    /* Two lots of padding: Pad the first block to 64 bytes */
+    memset(p, 0, count);
+    byteReverse(ctx->in, 16);
+    MD5Transform(ctx->buf, (uint32 *) ctx->in);
+
+    /* Now fill the next block with 56 bytes */
+    memset(ctx->in, 0, 56);
+    } else {
+    /* Pad block to 56 bytes */
+    memset(p, 0, count - 8);
+    }
+    byteReverse(ctx->in, 14);
+
+    /* Append length in bits and transform */
+    ((uint32 *) ctx->in)[14] = ctx->bits[0];
+    ((uint32 *) ctx->in)[15] = ctx->bits[1];
+
+    MD5Transform(ctx->buf, (uint32 *) ctx->in);
+    byteReverse((unsigned char *) ctx->buf, 4);
+    memcpy(digest, ctx->buf, 16);
+    memset(ctx, 0, sizeof(ctx));        /* In case it's sensitive */
+}
+
+
+/* The four core functions - F1 is optimized somewhat */
+
+/* #define F1(x, y, z) (x & y | ~x & z) */
+#define F1(x, y, z) (z ^ (x & (y ^ z)))
+#define F2(x, y, z) F1(z, x, y)
+#define F3(x, y, z) (x ^ y ^ z)
+#define F4(x, y, z) (y ^ (x | ~z))
+
+/* This is the central step in the MD5 algorithm. */
+#define MD5STEP(f, w, x, y, z, data, s) \
+    ( w += f(x, y, z) + data, w = w<<s | w>>(32-s), w += x )
+
+/*
+* The core of the MD5 algorithm, this alters an existing MD5 hash to
+* reflect the addition of 16 longwords of new data. MD5Update blocks
+* the data and converts bytes into longwords for this routine.
+*/
+void MD5Transform(buf, in)
+    uint32 buf[4]; uint32 in[16];
+{
+    register uint32 a, b, c, d;
+
+    a = buf[0];
+    b = buf[1];
+    c = buf[2];
+    d = buf[3];
+
+    MD5STEP(F1, a, b, c, d, in[0] + 0xd76aa478, 7);
+    MD5STEP(F1, d, a, b, c, in[1] + 0xe8c7b756, 12);
+    MD5STEP(F1, c, d, a, b, in[2] + 0x242070db, 17);
+    MD5STEP(F1, b, c, d, a, in[3] + 0xc1bdceee, 22);
+    MD5STEP(F1, a, b, c, d, in[4] + 0xf57c0faf, 7);
+    MD5STEP(F1, d, a, b, c, in[5] + 0x4787c62a, 12);
+    MD5STEP(F1, c, d, a, b, in[6] + 0xa8304613, 17);
+    MD5STEP(F1, b, c, d, a, in[7] + 0xfd469501, 22);
+    MD5STEP(F1, a, b, c, d, in[8] + 0x698098d8, 7);
+    MD5STEP(F1, d, a, b, c, in[9] + 0x8b44f7af, 12);
+    MD5STEP(F1, c, d, a, b, in[10] + 0xffff5bb1, 17);
+    MD5STEP(F1, b, c, d, a, in[11] + 0x895cd7be, 22);
+    MD5STEP(F1, a, b, c, d, in[12] + 0x6b901122, 7);
+    MD5STEP(F1, d, a, b, c, in[13] + 0xfd987193, 12);
+    MD5STEP(F1, c, d, a, b, in[14] + 0xa679438e, 17);
+    MD5STEP(F1, b, c, d, a, in[15] + 0x49b40821, 22);
+
+    MD5STEP(F2, a, b, c, d, in[1] + 0xf61e2562, 5);
+    MD5STEP(F2, d, a, b, c, in[6] + 0xc040b340, 9);
+    MD5STEP(F2, c, d, a, b, in[11] + 0x265e5a51, 14);
+    MD5STEP(F2, b, c, d, a, in[0] + 0xe9b6c7aa, 20);
+    MD5STEP(F2, a, b, c, d, in[5] + 0xd62f105d, 5);
+    MD5STEP(F2, d, a, b, c, in[10] + 0x02441453, 9);
+    MD5STEP(F2, c, d, a, b, in[15] + 0xd8a1e681, 14);
+    MD5STEP(F2, b, c, d, a, in[4] + 0xe7d3fbc8, 20);
+    MD5STEP(F2, a, b, c, d, in[9] + 0x21e1cde6, 5);
+    MD5STEP(F2, d, a, b, c, in[14] + 0xc33707d6, 9);
+    MD5STEP(F2, c, d, a, b, in[3] + 0xf4d50d87, 14);
+    MD5STEP(F2, b, c, d, a, in[8] + 0x455a14ed, 20);
+    MD5STEP(F2, a, b, c, d, in[13] + 0xa9e3e905, 5);
+    MD5STEP(F2, d, a, b, c, in[2] + 0xfcefa3f8, 9);
+    MD5STEP(F2, c, d, a, b, in[7] + 0x676f02d9, 14);
+    MD5STEP(F2, b, c, d, a, in[12] + 0x8d2a4c8a, 20);
+
+    MD5STEP(F3, a, b, c, d, in[5] + 0xfffa3942, 4);
+    MD5STEP(F3, d, a, b, c, in[8] + 0x8771f681, 11);
+    MD5STEP(F3, c, d, a, b, in[11] + 0x6d9d6122, 16);
+    MD5STEP(F3, b, c, d, a, in[14] + 0xfde5380c, 23);
+    MD5STEP(F3, a, b, c, d, in[1] + 0xa4beea44, 4);
+    MD5STEP(F3, d, a, b, c, in[4] + 0x4bdecfa9, 11);
+    MD5STEP(F3, c, d, a, b, in[7] + 0xf6bb4b60, 16);
+    MD5STEP(F3, b, c, d, a, in[10] + 0xbebfbc70, 23);
+    MD5STEP(F3, a, b, c, d, in[13] + 0x289b7ec6, 4);
+    MD5STEP(F3, d, a, b, c, in[0] + 0xeaa127fa, 11);
+    MD5STEP(F3, c, d, a, b, in[3] + 0xd4ef3085, 16);
+    MD5STEP(F3, b, c, d, a, in[6] + 0x04881d05, 23);
+    MD5STEP(F3, a, b, c, d, in[9] + 0xd9d4d039, 4);
+    MD5STEP(F3, d, a, b, c, in[12] + 0xe6db99e5, 11);
+    MD5STEP(F3, c, d, a, b, in[15] + 0x1fa27cf8, 16);
+    MD5STEP(F3, b, c, d, a, in[2] + 0xc4ac5665, 23);
+
+    MD5STEP(F4, a, b, c, d, in[0] + 0xf4292244, 6);
+    MD5STEP(F4, d, a, b, c, in[7] + 0x432aff97, 10);
+    MD5STEP(F4, c, d, a, b, in[14] + 0xab9423a7, 15);
+    MD5STEP(F4, b, c, d, a, in[5] + 0xfc93a039, 21);
+    MD5STEP(F4, a, b, c, d, in[12] + 0x655b59c3, 6);
+    MD5STEP(F4, d, a, b, c, in[3] + 0x8f0ccc92, 10);
+    MD5STEP(F4, c, d, a, b, in[10] + 0xffeff47d, 15);
+    MD5STEP(F4, b, c, d, a, in[1] + 0x85845dd1, 21);
+    MD5STEP(F4, a, b, c, d, in[8] + 0x6fa87e4f, 6);
+    MD5STEP(F4, d, a, b, c, in[15] + 0xfe2ce6e0, 10);
+    MD5STEP(F4, c, d, a, b, in[6] + 0xa3014314, 15);
+    MD5STEP(F4, b, c, d, a, in[13] + 0x4e0811a1, 21);
+    MD5STEP(F4, a, b, c, d, in[4] + 0xf7537e82, 6);
+    MD5STEP(F4, d, a, b, c, in[11] + 0xbd3af235, 10);
+    MD5STEP(F4, c, d, a, b, in[2] + 0x2ad7d2bb, 15);
+    MD5STEP(F4, b, c, d, a, in[9] + 0xeb86d391, 21);
+
+    buf[0] += a;
+    buf[1] += b;
+    buf[2] += c;
+    buf[3] += d;
+}
+
+void printHex(const int a){
+	switch (a){
+		case 0 :
+			printf("0");break;
+		case 1 :
+			printf("1");break;
+		case 2 :
+			printf("2");break;
+		case 3 :
+			printf("3");break;
+		case 4 :
+			printf("4");break;
+		case 5 :
+			printf("5");break;
+		case 6 :
+			printf("6");break;
+		case 7 :
+			printf("7");break;
+		case 8 :
+			printf("8");break;
+		case 9 :
+			printf("9");break;
+		case 10 :
+			printf("A");break;
+		case 11 :
+			printf("B");break;
+		case 12 :
+			printf("C");break;
+		case 13 :
+			printf("D");break;
+		case 14 :
+			printf("E");break;
+		case 15 :
+			printf("F");break;
+	}
+}
+
+void Yume()
+{	
+	printf("\nThis Program Can Calculate The MD5 Of A String For You !\n");
+	while(1){
+		printf("Please Input Your String:\n");
+		char s[255];
+		TTY *p_tty=tty_table+2;
+		p_tty->startScanf=0;
+		openStartScanf(p_tty);
+		while (p_tty->startScanf) ;
+		mystrncpy(s,p_tty->str,255);
+
+		struct MD5Context md5c;
+		unsigned char ss[16];
+		char buf[33]={'\0'};
+		char tmp[3]={'\0'};
+		int i;
+		MD5Init( &md5c );
+		MD5Update( &md5c, s, strlen(s) );
+		MD5Final( ss, &md5c );
+
+		printf("Done ! The MD5 Of The String Is :\n" );
+		for( i=0; i<16; i++ ){
+			int first = ss[i]/16;
+			int second = ss[i]%16;
+			printHex(first);
+			printHex(second);
+		}
+		printf("\n\n");
 	}
 }
