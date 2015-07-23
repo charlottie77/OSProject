@@ -181,9 +181,9 @@ PUBLIC int tinix_main()
 	//指定控制台
 	proc_table[1].nr_tty = 0;
 	proc_table[2].nr_tty = 1;
-	proc_table[3].nr_tty = 1;
-	proc_table[4].nr_tty = 1;
-	proc_table[5].nr_tty = 1;
+	proc_table[3].nr_tty = 3;
+	proc_table[4].nr_tty = 3;
+	proc_table[5].nr_tty = 3;
 	proc_table[6].nr_tty = 4;
 	proc_table[7].nr_tty = 5;
 
@@ -360,14 +360,14 @@ void Terminal()
 /*======================================================================*
                                TestB
  *======================================================================*/
-void TestB()
+/*void TestB()
 {
 	int i = 0;
 	while(1){
 		printf("B");
 		milli_delay(1000);
 	}
-}
+}*/
 
 
 
@@ -766,5 +766,177 @@ void Yume()
 			printHex(second);
 		}
 		printf("\n\n");
+	}
+}
+
+int year,month,day,year1,month1,day1,result,n,i,x,y;
+int table[]={29,31,28,31,30,31,30,31,31,30,31,30,31};     //定义每个月的天数
+int table1[] = {28,31,29,31,30,31,30,31,31,30,31,30,31};
+int mem =0;
+	
+void initDates(){
+	year=0;
+	month=0;
+	day=0;
+	year1=0;
+	month1=0;
+	day1=0;
+	result=0;
+	n=0;
+	i=0;
+	x=0;
+	y=0;
+}
+
+void TestB()
+{
+	printf("Please input the beginning and the ending date:\n  like: yyyy mm dd yyyy mm dd\n");
+
+	while(1){
+		initDates();
+		TTY *p_tty=tty_table+1;
+		p_tty->startScanf=0;
+		char dates[255];
+		openStartScanf(p_tty);
+		while (p_tty->startScanf) ;
+		mystrncpy(dates,p_tty->str,255);
+	// printf(dates);
+	//	printf("at least in length:%d",strlen(dates));
+
+		int index=0;
+		for(;index<strlen(dates);index++){
+		//printf("this is %d",index);
+			if(dates[index]<='9'&&dates[index]>='0'){
+				year=year*10+dates[index]-'0';
+			}
+			else{
+				index++;
+			//printf("kneel at %d\n",index);
+				break;
+			}
+		}
+		for(;index<strlen(dates);index++){
+		//printf("this is %d",index);
+			if(dates[index]<='9'&&dates[index]>='0'){
+				month=month*10+dates[index]-'0';
+			}
+			else{
+				index++;
+			//printf("kneel at %d\n",index);
+				break;
+			}
+		}
+		for(;index<strlen(dates);index++){
+		//printf("this is %d",index);
+			if(dates[index]<='9'&&dates[index]>='0'){
+				day=day*10+dates[index]-'0';
+			}
+			else{
+				index++;
+			//printf("kneel at %d\n",index);
+				break;
+			}
+		}
+		for(;index<strlen(dates);index++){
+		//printf("this is %d",index);
+			if(dates[index]<='9'&&dates[index]>='0'){
+				year1=year1*10+dates[index]-'0';
+			}
+			else{
+				index++;
+			//printf("kneel at %d\n",index);
+				break;
+			}
+		}
+		for(;index<strlen(dates);index++){
+		//printf("this is %d",index);
+			if(dates[index]<='9'&&dates[index]>='0'){
+				month1=month1*10+dates[index]-'0';
+			}
+			else{
+				index++;
+			//printf("kneel at %d\n",index);
+				break;
+			}
+		}
+		for(;index<strlen(dates);index++){
+		//printf("this is %d",index);
+			if(dates[index]<='9'&&dates[index]>='0'){
+				day1=day1*10+dates[index]-'0';
+			}
+			else{
+				index++;
+			//printf("kneel at %d\n",index);
+				break;
+			}
+		}
+
+		//printf("%d%d%d%d%d%d\n", year,month,day,year1,month1,day1);
+
+		if(year*100+month*10+day>year1*100+month1*10+day1||year<1||year1<1||
+			month<1||month>12||month1<1||month1>12||
+			day<1||day1<1||
+			day>table1[month]||day1>table1[month1]){
+			printf("Date Invalid !\n"); 
+			continue;
+		}
+		else if(year%4!=0 && month==2 && day>28)   {
+			printf("February Error !\n"); 
+			continue;
+		}
+
+		else if(year1%4!=0 && month1==2 && day1>28)   {
+			printf("February Error !\n"); 
+			continue;
+		}
+		else
+		{
+			x = month;
+			y = year;
+			if(year==year1)   //while they are in the same year!
+			{
+				if(month==month1)   // and the same month!
+					result = day1-day;  //   so....
+				else    //the same year but different  monthes.
+				{
+					if(year%4==0 && month==2)  
+						result = table[0]-day;  
+					else
+						result = table[month]-day;    //英语不够用啦，先将起始年的起始月剩余天数算出。
+					for(month++;month<month1;month++)
+					{
+						if(year%4==0 && month==2)
+							result = result + table[0];  
+						else
+							result = result+table[month];     //将整月的天数加起来！
+					}
+					result = result+day1;     //最后一个月包含的天数加起来@！
+				}
+			}
+			else          //when they are in different years.   similar to上面的。
+			{
+				if(year%4==0 && month==2)
+					result = table[0]-day;
+				else
+					result = table[month]-day;
+				for(month++;month<=12;month++)
+					if(year%4==0 && month==2)
+						result = result + table[0];
+					else
+						result = result + table[month];
+					mem =year;
+					for(year++;year<year1;year++)
+					{	
+						if(year%4==0)
+							result = result + 366;
+						else
+							result = result + 365;
+					}
+					for(i=1;i<month1;i++)
+						result = result + table[i];
+					result = result + day1;
+				}
+			printf("%d.%d.%d to %d.%d.%d \nstill have %ddays \n\n",mem,x,day,year1,month1,day1,result);     //输出结果
+		}
 	}
 }
