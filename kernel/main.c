@@ -16,14 +16,16 @@
 #include "proto.h"
 #include "md5.h"
 
-/*TTY *mytty=tty_table+3;
-char mytty_cmd[255];
+
 char myGetChar(){
+	TTY *mytty=tty_table+2;
+	char mytty_cmd[255];
+	mytty->startScanf=0;
 	openStartScanf(mytty);
 	while (mytty->startScanf) ;
 	//mystrncpy(mytty_cmd,lalala->str,255);
 	return mytty->str[0];
-}*/
+}
 
 int strcmp(char *str1,char *str2)
 {
@@ -35,12 +37,6 @@ int strcmp(char *str1,char *str2)
 		else if (str1[i]<str2[i]) return -1;
 	}
 	return 0;
-}
-
-void display(int z[5][5])
-{
-	//clearScreen();
-	printf(" ---- ---- ---- ----\n");
 }
 
 void strlwr(char *str)
@@ -94,26 +90,141 @@ void addToQueue(PROCESS* p)
  *======================================================================*/
 PUBLIC int tinix_main()
 {
+	init_clock();
 	//disp_str("-----\"tinix_main\" begins-----\n");
 	clearScreen();
-	disp_str("         *************************************************************\n");
-	disp_str("        *                                                             \n");
-	disp_str("       * **********    ******    ***      **    ******    **    **    \n");
-	disp_str("      *      **          **      ****     **      **        *  *      \n");
-	disp_str("     *       **          **      ** **    **      **         **       \n");
-	disp_str("    *        **          **      **  **   **      **         **       \n");
-	disp_str("   *         **          **      **   **  **      **         **       \n");
-	disp_str("  *          **          **      **    ** **      **         **       \n");
-	disp_str(" *           **          **      **     ****      **       *    *     \n");
-	disp_str("*            **        ******    **      ***    ******   **      **   \n");	
-	disp_str("*                                                                     \n");
-	disp_str("*                                                                     \n");
-	disp_str("*                                                                     \n");
-	disp_str("*   TUDIDI                                                            \n");
-	disp_str("*                                                                     \n");
-	disp_str("*                                                                     \n");
-	disp_str("*                                                                     \n");
-	disp_str("**********************************************************************\n");
+	disp_color_str("************************************************************************\n",0xc);
+	disp_color_str("*                 AAAAAAA                                              *\n",0xe);
+	disp_color_str("*              AAAAAAAAAAAAA                                           *\n",0xe);
+	disp_color_str("*            AAAAAAAAAAAAAAAAA                                         *\n",0xe);
+	disp_color_str("*           AAAAAAAAAAA  AAAAAA                                        *\n",0xe);
+	disp_color_str("*          AAAAAAAAAAAAAAAAAAAAA                                       *\n",0xe);
+	disp_color_str("*          AAAAAAAAAAAAAAAAAAAAA                                       *\n",0xe);
+	disp_color_str("*         AAAAAAAAAAAAAAAAAAAAAAA             OO                       *\n",0xe);
+	disp_color_str("*         AAAAAAAAAAAAAAAAAAAAAAA            OOOO                      *\n",0xe);
+	disp_color_str("*         AAAAAAAAAAAAAAAAAAAAAAA             OO                       *\n",0xe);
+	disp_color_str("*          AAAAAAAAAAAAAAAAAAAAA                                       *\n",0xe);
+	disp_color_str("*          AAAAAAAAAAAAAAAAAAAAA                                       *\n",0xe);
+	disp_color_str("*           AAAAAAAAAAAAAAAAAAA                                        *\n",0xe);
+	disp_color_str("*            AAAAAAAAAAAAAAAAA                                         *\n",0xe);
+	disp_color_str("*              AAAAAAAAAAAA                                            *\n",0xe);
+	disp_color_str("*                 AAAAAAA                                              *\n",0xe);
+	disp_color_str("*                                                                      *\n",0xc);
+	disp_color_str("*                          The OS Project                              *\n",0xc);
+	disp_color_str("*                                                                      *\n",0xc);
+	disp_color_str("************************************************************************\n",0xc);
+	milli_delay(2000);
+	clearScreen();
+	disp_color_str("************************************************************************\n",0xc);
+	disp_color_str("*                      AAAAAAA                                         *\n",0xe);
+	disp_color_str("*                   AAAAAAAAAAAAA                                      *\n",0xe);
+	disp_color_str("*                 AAAAAAAAAAAAAAAAA                                    *\n",0xe);
+	disp_color_str("*                AAAAAAAAAAA  AAAA.A                                   *\n",0xe);
+	disp_color_str("*               AAAAAAAAAAAAAAAA.`                                     *\n",0xe);
+	disp_color_str("*               AAAAAAAAAAAAAA.`                                       *\n",0xe);
+	disp_color_str("*              AAAAAAAAAAAAA.`                OO                       *\n",0xe);
+	disp_color_str("*              AAAAAAAAAAA-,                 OOOO                      *\n",0xe);
+	disp_color_str("*              AAAAAAAAAAAAA`.                OO                       *\n",0xe);
+	disp_color_str("*               AAAAAAAAAAAAAA`.                                       *\n",0xe);
+	disp_color_str("*               AAAAAAAAAAAAAAAA`.                                     *\n",0xe);
+	disp_color_str("*                AAAAAAAAAAAAAAAAA'A                                   *\n",0xe);
+	disp_color_str("*                 AAAAAAAAAAAAAAAAA                                    *\n",0xe);
+	disp_color_str("*                   AAAAAAAAAAAAA                                      *\n",0xe);
+	disp_color_str("*                      AAAAAAA                                         *\n",0xe);
+	disp_color_str("*                          The OS Project                              *\n",0xc);
+	disp_color_str("*                            July ,2015                                *\n",0xc);
+	disp_color_str("*                                                                      *\n",0xc);
+	disp_color_str("************************************************************************\n",0xc);
+
+	milli_delay(2000);
+	clearScreen();
+	disp_color_str("************************************************************************\n",0xc);
+	disp_color_str("*                           AAAAAAA                                    *\n",0xe);
+	disp_color_str("*                        AAAAAAAAAAAAA                                 *\n",0xe);
+	disp_color_str("*                      AAAAAAAAAAAAAAAAA                               *\n",0xe);
+	disp_color_str("*                     AAAAAAAAAAA  AAAAAA                              *\n",0xe);
+	disp_color_str("*                    AAAAAAAAAAAAAAAAAAAAA                             *\n",0xe);
+	disp_color_str("*                    AAAAAAAAAAAAAAAAAAAAA                             *\n",0xe);
+	disp_color_str("*                   AAAAAAAAAAAAAAAAAAAAAAA   OO                       *\n",0xe);
+	disp_color_str("*                   AAAAAAAAAAAAAAAAAAAAAAA  OOOO                      *\n",0xe);
+	disp_color_str("*                   AAAAAAAAAAAAAAAAAAAAAAA   OO                       *\n",0xe);
+	disp_color_str("*                    AAAAAAAAAAAAAAAAAAAAA                             *\n",0xe);
+	disp_color_str("*                    AAAAAAAAAAAAAAAAAAAAA                             *\n",0xe);
+	disp_color_str("*                     AAAAAAAAAAAAAAAAAAA                              *\n",0xe);
+	disp_color_str("*                      AAAAAAAAAAAAAAAAA                               *\n",0xe);
+	disp_color_str("*                        AAAAAAAAAAAAA                                 *\n",0xe);
+	disp_color_str("*                           AAAAAAA                                    *\n",0xe);
+	disp_color_str("*                          The OS Project                              *\n",0xc);
+	disp_color_str("*                            July ,2015                                *\n",0xc);
+	disp_color_str("*                By Wang Zeyu | Guo Yuqing | Zhu Mengyao               *\n",0xc);
+	disp_color_str("************************************************************************\n",0xc);
+	milli_delay(2000);
+	clearScreen();
+	disp_color_str("************************************************************************\n",0xc);
+	disp_color_str("*                                AAAAAAA                               *\n",0xe);
+	disp_color_str("*                             AAAAAAAAAAAAA                            *\n",0xe);
+	disp_color_str("*                           AAAAAAAAAAAAAAAAA                          *\n",0xe);
+	disp_color_str("*                          AAAAAAAAAAA  AAAA.A                         *\n",0xe);
+	disp_color_str("*                         AAAAAAAAAAAAAAAA.`                           *\n",0xe);
+	disp_color_str("*                         AAAAAAAAAAAAAA.`                             *\n",0xe);
+	disp_color_str("*                        AAAAAAAAAAAAA.`      OO                       *\n",0xe);
+	disp_color_str("*                        AAAAAAAAAAAA-,      OOOO                      *\n",0xe);
+	disp_color_str("*                        AAAAAAAAAAAAA`.      OO                       *\n",0xe);
+	disp_color_str("*                         AAAAAAAAAAAAAA`.                             *\n",0xe);
+	disp_color_str("*                         AAAAAAAAAAAAAAAA`.                           *\n",0xe);
+	disp_color_str("*                          AAAAAAAAAAAAAAAAA'A                         *\n",0xe);
+	disp_color_str("*                           AAAAAAAAAAAAAAAAA                          *\n",0xe);
+	disp_color_str("*                             AAAAAAAAAAAAA                            *\n",0xe);
+	disp_color_str("*                                AAAAAAA                               *\n",0xe);
+	disp_color_str("*                          The OS Project                              *\n",0xc);
+	disp_color_str("*                            July ,2015                                *\n",0xc);
+	disp_color_str("*                By Wang Zeyu | Guo Yuqing | Zhu Mengyao               *\n",0xc);
+	disp_color_str("************************************************************************\n",0xc);
+	milli_delay(2000);
+	clearScreen();
+	disp_color_str("************************************************************************\n",0xc);
+	disp_color_str("*                                     AAAAAAA                          *\n",0xe);
+	disp_color_str("*                                  AAAAAAAAAAAAA                       *\n",0xe);
+	disp_color_str("*                                AAAAAAAAAAAAAAAAA                     *\n",0xe);
+	disp_color_str("*                               AAAAAAAAAAA  AAAAAA                    *\n",0xe);
+	disp_color_str("*                              AAAAAAAAAAAAAAAAAAAAA                   *\n",0xe);
+	disp_color_str("*                              AAAAAAAAAAAAAAAAAAAAA                   *\n",0xe);
+	disp_color_str("*                             AAAAAAAAAAAAAAAAAAAAAAA                  *\n",0xe);
+	disp_color_str("*                             AAAAAAAAAAAAAAAAAAAAAAA                  *\n",0xe);
+	disp_color_str("*                             AAAAAAAAAAAAAAAAAAAAAAA                  *\n",0xe);
+	disp_color_str("*                              AAAAAAAAAAAAAAAAAAAAA                   *\n",0xe);
+	disp_color_str("*                              AAAAAAAAAAAAAAAAAAAAA                   *\n",0xe);
+	disp_color_str("*                               AAAAAAAAAAAAAAAAAAA                    *\n",0xe);
+	disp_color_str("*                                AAAAAAAAAAAAAAAAA                     *\n",0xe);
+	disp_color_str("*                                  AAAAAAAAAAAAA                       *\n",0xe);
+	disp_color_str("*                                     AAAAAAA                          *\n",0xe);
+	disp_color_str("*                          The OS Project                              *\n",0xc);
+	disp_color_str("*                            July ,2015                                *\n",0xc);
+	disp_color_str("*                By Wang Zeyu | Guo Yuqing | Zhu Mengyao               *\n",0xc);
+	disp_color_str("************************************************************************\n",0xc);
+	milli_delay(2000);
+	clearScreen();
+	disp_color_str("************************************************************************\n",0xc);
+	disp_color_str("*                                          AAAAAAA                     *\n",0xe);
+	disp_color_str("*                                       AAAAAAAAAAAAA                  *\n",0xe);
+	disp_color_str("*                                     AAAAAAAAAAAAAAAAA                *\n",0xe);
+	disp_color_str("*                                    AAAAAAAAAAA  AAAA.A               *\n",0xe);
+	disp_color_str("*                                   AAAAAAAAAAAAAAAA.`                 *\n",0xe);
+	disp_color_str("*                                   AAAAAAAAAAAAAA.`                   *\n",0xe);
+	disp_color_str("*                                  AAAAAAAAAAAAA.`                     *\n",0xe);
+	disp_color_str("*                                  AAAAAAAAAAA-, Hello World!          *\n",0xe);
+	disp_color_str("*                                  AAAAAAAAAAAAA`.                     *\n",0xe);
+	disp_color_str("*                                   AAAAAAAAAAAAAA`.                   *\n",0xe);
+	disp_color_str("*                                   AAAAAAAAAAAAAAAA`.                 *\n",0xe);
+	disp_color_str("*                                    AAAAAAAAAAAAAAAAA'A               *\n",0xe);
+	disp_color_str("*                                     AAAAAAAAAAAAAAAAA                *\n",0xe);
+	disp_color_str("*                                       AAAAAAAAAAAAA                  *\n",0xe);
+	disp_color_str("*                                          AAAAAAA                     *\n",0xe);
+	disp_color_str("*                          The OS Project                              *\n",0xc);
+	disp_color_str("*                            July ,2015                                *\n",0xc);
+	disp_color_str("*                By Wang Zeyu | Guo Yuqing | Zhu Mengyao               *\n",0xc);
+	disp_color_str("************************************************************************\n",0xc);
+
 	TASK*		p_task;
 	PROCESS*	p_proc		= proc_table;
 	char*		p_task_stack	= task_stack + STACK_SIZE_TOTAL;
@@ -169,8 +280,6 @@ PUBLIC int tinix_main()
 	proc_table[3].priority =  5;
 	proc_table[4].priority =  7;
 	proc_table[5].priority =  10;
-	proc_table[6].priority =  10;
-	proc_table[7].priority =  10;
 
 	//对优先队列初始化
 	firstLen=firstHead=secondLen=0;
@@ -181,11 +290,11 @@ PUBLIC int tinix_main()
 	//指定控制台
 	proc_table[1].nr_tty = 0;
 	proc_table[2].nr_tty = 1;
-	proc_table[3].nr_tty = 3;
+	proc_table[3].nr_tty = 2;
 	proc_table[4].nr_tty = 3;
-	proc_table[5].nr_tty = 3;
-	proc_table[6].nr_tty = 4;
-	proc_table[7].nr_tty = 5;
+	proc_table[5].nr_tty = 4;
+	//proc_table[6].nr_tty = 4;
+	//proc_table[7].nr_tty = 5;
 
 	k_reenter	= 0;
 	ticks		= 0;
@@ -213,16 +322,18 @@ void clearScreen()
 
 void help()
 {
-	printf("           *////////////////////////////////////////////*/\n");
-	printf("                   design by Doubi && LiangPuHe         \n");
-	printf("           *////////////////////////////////////////////*/\n");
+	printf("           */////////////////////////////////////////////*/\n");
+	printf("               Designed By Gretchen,Sylvia and Shepard    \n");
+	printf("           */////////////////////////////////////////////*/\n");
 	printf("\n");
 	printf("      *////////////////////////////////////////////////////////*\n");
 	printf("      *////  help         --------  shwo the help menu     ////*\n");
 	printf("      *////  clear        --------  clear screen           ////*\n");
-	printf("      *////  alt+F2       --------  show the process run   ////*\n");
-	printf("      *////  alt+F3       --------  goBang game            ////*\n");
-	printf("      *////  alt+F4       --------  guess number game      ////*\n");
+	printf("      *////  F1           --------  go back to terminal    ////*\n");
+	printf("      *////  F2           --------  days matter            ////*\n");
+	printf("      *////  F3           --------  2048 on linux          ////*\n");
+	printf("      *////  F4           --------  Caesar code            ////*\n");
+	printf("      *////  F5           --------  MD5 calculate          ////*\n");
 	printf("      *////  kill 2~5     --------  kill the process 2~5   ////*\n");
 	printf("      *////  start 2~5    --------  start the process 2~5  ////*\n");
 	printf("      *////  show         --------  show the process state ////*\n");
@@ -358,37 +469,496 @@ void Terminal()
 
 
 /*======================================================================*
-                               TestB
+                               2048
  *======================================================================*/
-/*void TestB()
-{
-	int i = 0;
-	while(1){
-		printf("B");
-		milli_delay(1000);
-	}
-}*/
+extern x;
+int x = 1;
 
-
-
-/*======================================================================*
-                               TestC
- *======================================================================*/
 void TestC()
 {
-	int i = 0;
 	while(1){
-		printf("C");
-		milli_delay(1000);
+        char ch;
+        int p[5][5] = { 0 };
+        int m[5][5] = { 0 };
+        int a[5][5] = { 0 };
+        int b, c, d, e;
+
+
+        b = getNextNumber() % 5;
+        for (; b == 0;)
+            b = getNextNumber() % 5;
+
+        c = getNextNumber() % 5;
+        for (; c == 0;)
+            c = getNextNumber() % 5;
+
+        d = getNextNumber() % 5;
+        for (; d == 0;)
+            d = getNextNumber() % 5;
+
+        e = getNextNumber() % 5;
+        for (; e == 0;)
+            e = getNextNumber() % 5;
+        a[b][c] = 2;
+        if ((b == d) && (c == e))
+        {
+            d = 5 - d;
+            c = 5 - c;
+        }
+        a[d][e] = 2;
+        display(a);
+        f3(a, m, p);
+        ch = myGetChar();
 	}
 }
+
+/*char myGetChar(){
+	TTY *p_tty=tty_table+2;
+	p_tty->startScanf=0;
+	char inputs[255];
+	openStartScanf(p_tty);
+	while (p_tty->startScanf) ;
+	mystrncpy(inputs,p_tty->str,255);
+	char tmp=inputs[0];
+	return (tmp==0? ' ':tmp);
+}
+
+char myGetChar(){
+	TTY *mytty=tty_table+3;
+	char mytty_cmd[255];
+	openStartScanf(mytty);
+	while (mytty->startScanf) ;
+	//mystrncpy(mytty_cmd,lalala->str,255);
+	return mytty->str[0];
+}
+*/
+
+int PC(int ze[5][5])
+{
+	ze[4][4] = 2048;
+	return 0;
+}
+int f2048(int ze[5][5])
+{
+	int k; int i; int j;
+	k = 0;
+	for (i = 1; i < 5; i++)
+		for (j = 1; j < 5; j++)
+		{
+			if (ze[i][j] == 2048)
+			{
+				k = 1;
+				return k;
+			}
+		}
+	return k;
+
+}
+int f(int n)
+{
+	int a, i, c;
+	a = 0;
+	c = n;
+	for (i = 0; i < 5; i++)
+	{
+		if (n > 0)
+		{
+			a = a + 1;
+		}
+		n = n / 10;
+	}
+	for (i = 0; i < 4 - a; i++)
+	{
+		printf(" ");
+	}
+	if (c > 0)
+	{
+		printf("%d", c);
+	}
+	return 0;
+}
+
+
+int display(int z[5][5])
+{
+	sys_clear(tty_table+2);
+	printf("Welcome To 2048\nInput a to move left,s to down,d to right,w to up.\nTwice input r to restart\n");
+	printf(" ---- ---- ---- ----\n");
+	printf("|    |    |    |    |\n");
+	printf("|"); f(z[1][1]);
+	printf("|"); f(z[1][2]);
+	printf("|"); f(z[1][3]);
+	printf("|"); f(z[1][4]); printf("|\n"); 
+	printf(" ---- ---- ---- ----\n");
+	printf("|    |    |    |    |\n");
+	printf("|"); f(z[2][1]); printf("|"); f(z[2][2]); printf("|"); f(z[2][3]); printf("|"); f(z[2][4]); printf("|\n"); 
+	printf(" ---- ---- ---- ----\n");
+	printf("|    |    |    |    |\n");
+	printf("|"); f(z[3][1]); printf("|"); f(z[3][2]); printf("|"); f(z[3][3]); printf("|"); f(z[3][4]); printf("|\n"); 
+	printf(" ---- ---- ---- ----\n");
+	printf("|    |    |    |    |\n");
+	printf("|"); f(z[4][1]); printf("|"); f(z[4][2]); printf("|"); f(z[4][3]); printf("|"); f(z[4][4]); printf("|\n"); 
+	printf(" ---- ---- ---- ----\n");
+	return 0;
+}
+
+int check1(int td[5][5])
+{
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if ((td[1][n] + td[2][n] + td[3][n] + td[4][n]) == 0);
+		else{
+			for (; td[1][n] == 0;)
+			{
+				td[1][n] = td[2][n];
+				td[2][n] = td[3][n];
+				td[3][n] = td[4][n];
+				td[4][n] = 0;
+			}
+			if ((td[2][n] + td[3][n] + td[4][n]) == 0);
+			else{
+				for (; td[2][n] == 0;)
+				{
+					td[2][n] = td[3][n];
+					td[3][n] = td[4][n];
+					td[4][n] = 0;
+				}
+			}
+			if ((td[3][n] + td[4][n]) == 0);
+			else{
+				for (; td[3][n] == 0;)
+				{
+					td[3][n] = td[4][n];
+					td[4][n] = 0;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int check2(int td[5][5]){
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if ((td[1][n] + td[2][n] + td[3][n] + td[4][n]) == 0);
+		else{
+			for (; td[4][n] == 0;)
+			{
+				td[4][n] = td[3][n];
+				td[3][n] = td[2][n];
+				td[2][n] = td[1][n];
+				td[1][n] = 0;
+			}
+			for (; td[3][n] == 0;)
+			{
+				td[3][n] = td[2][n];
+				td[2][n] = td[1][n];
+				td[1][n] = 0;
+				if ((td[2][n] + td[3][n] + td[1][n]) == 0)
+					break;
+			}
+			for (; td[2][n] == 0;)
+			{
+				td[2][n] = td[1][n];
+				td[1][n] = 0;
+				if ((td[2][n] + td[1][n]) == 0)
+					break;
+			}
+		}
+	}
+	return 0;
+}
+int check3(int td[5][5]){
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if ((td[n][1] + td[n][2] + td[n][3] + td[n][4]) == 0);
+		else{
+			for (; td[n][1] == 0;)
+			{
+				td[n][1] = td[n][2];
+				td[n][2] = td[n][3];
+				td[n][3] = td[n][4];
+				td[n][4] = 0;
+			}
+			for (; td[n][2] == 0;)
+			{
+				td[n][2] = td[n][3];
+				td[n][3] = td[n][4];
+				td[n][4] = 0;
+				if ((td[n][2] + td[n][3] + td[n][4]) == 0)
+					break;
+			}
+			for (; td[n][3] == 0;)
+			{
+				td[n][3] = td[n][4];
+				td[n][4] = 0;
+				if ((td[n][3] + td[n][4]) == 0)
+					break;
+			}
+		}
+	}
+	return 0;
+}
+
+int check4(int td[5][5]){
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if ((td[n][1] + td[n][2] + td[n][3] + td[n][4]) == 0);
+		else
+		{
+			for (; td[n][4] == 0;)
+			{
+				td[n][4] = td[n][3];
+				td[n][3] = td[n][2];
+				td[n][2] = td[n][1];
+				td[n][1] = 0;
+			}
+			for (; td[n][3] == 0;)
+			{
+				td[n][3] = td[n][2];
+				td[n][2] = td[n][1];
+				td[n][1] = 0;
+				if ((td[n][3] + td[n][2] + td[n][1]) == 0)
+					break;
+			}
+			for (; td[n][2] == 0;)
+			{
+				td[n][2] = td[n][1];
+				td[n][1] = 0;
+				if ((td[n][2] + td[n][1]) == 0)
+					break;
+			}
+		}
+	}
+	return 0;
+}
+
+int up(int td[5][5]){
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if (td[1][n] == td[2][n])
+		{
+			td[1][n] = 2 * td[1][n];
+			td[2][n] = 0;
+		}
+		if (td[2][n] == td[3][n])
+		{
+			td[2][n] = 2 * td[2][n];
+			td[3][n] = 0;
+		}
+		if (td[3][n] == td[4][n])
+		{
+			td[3][n] = 2 * td[3][n];
+			td[4][n] = 0;
+		}
+		check1(td);
+	}
+	return 0;
+}
+
+int down(int td[5][5]){
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if (td[3][n] == td[4][n])
+		{
+			td[4][n] = 2 * td[4][n];
+			td[3][n] = 0;
+		}
+		if (td[2][n] == td[3][n])
+		{
+			td[3][n] = 2 * td[3][n];
+			td[2][n] = 0;
+		}
+		if (td[1][n] == td[2][n])
+		{
+			td[2][n] = 2 * td[2][n];
+			td[1][n] = 0;
+		}
+		check2(td);
+	}
+	return 0;
+}
+
+int left(int td[5][5]){
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if (td[n][1] == td[n][2])
+		{
+			td[n][1] = 2 * td[n][1];
+			td[n][2] = 0;
+		}
+		if (td[n][2] == td[n][3])
+		{
+			td[n][2] = 2 * td[n][2];
+			td[n][3] = 0;
+		}
+		if (td[n][3] == td[n][4])
+		{
+			td[n][3] = 2 * td[n][3];
+			td[n][4] = 0;
+		}
+		check3(td);
+	}
+	return 0;
+}
+
+int right(int td[5][5]){
+	int n;
+	for (n = 1; n < 5; n++)
+	{
+		if (td[n][4] == td[n][3])
+		{
+			td[n][4] = 2 * td[n][4];
+			td[n][3] = 0;
+		}
+		if (td[n][3] == td[n][2])
+		{
+			td[n][3] = 2 * td[n][3];
+			td[n][2] = 0;
+		}
+		if (td[n][2] == td[n][1])
+		{
+			td[n][2] = 2 * td[n][2];
+			td[n][1] = 0;
+		}
+		check4(td);
+	}
+	return 0;
+}
+
+int f378(int o[5][5])
+{
+	int a, b, i;
+	i = 0; x++;
+
+	a = getNextNumber() % 4 + 1;
+
+	b = getNextNumber() % 4 + 1;
+	for (; o[a][b] != 0;)
+	{
+		x++;
+
+		a = getNextNumber() % 4 + 1;
+
+		b = getNextNumber() % 4 + 1;
+	}
+	o[a][b] = 2;
+	return 0;
+}
+
+int P1(int o[5][5]){
+	check1(o);
+	up(o);
+	return 0;
+}
+
+int P2(int o[5][5])
+{
+	check2(o);
+	down(o);
+	return 0;
+}
+
+int P3(int o[5][5]){
+	check3(o);
+	left(o);
+	return 0;
+}
+
+int P4(int o[5][5]){
+	check4(o);
+	right(o);
+	return 0;
+}
+
+int fake(int f[5][5], int q[5][5]){
+	int i; int j;
+	for (i = 1; i < 5; i++)
+		for (j = 1; j < 5; j++)
+		{
+			f[i][j] = q[i][j];
+		}
+
+	return 0;
+}
+
+int getNextNumber(){
+    static int index = 10;
+    index=index*1.354+2;
+    if(index<0)
+        index=0;
+    return get_ticks()%128;
+}
+
+int f3(int q[5][5], int f[5][5], int s[5][5])
+{
+	char press; 
+	int k; int t; int i; int j; int u;
+	t = 1;
+	for (; k = 1;)
+	{
+		press = myGetChar();
+		fake(f, q);
+		switch (press)
+		{
+		case 'w': P1(q); break;
+		case 's': P2(q); break;
+		case 'a': P3(q); break;
+		case 'd': P4(q); break;
+		case 'W': P1(q); break;
+		case 'S': P2(q); break;
+		case 'A': P3(q); break;
+		case 'D': P4(q); break;
+		case 'C': PC(q); break;
+		case 'r': return 0;
+		case 'R': return 0;
+		default : break;
+		}
+		u = 0;
+		for (i = 1; i < 5; i++)
+			for (j = 1; j < 5; j++)
+			{
+				if (q[i][j] != f[i][j])
+				{
+					u = 1; break;
+				}
+			}
+		if (!u)
+		{
+		}
+		else
+		{
+			f378(q);
+		}
+		display(f);
+		display(q);
+		if (f2048(q))
+		{
+			printf("You Win!");
+			break;
+		}
+	}
+	return 0;
+}
+
+/*======================================================================*
+                               DE
+ *======================================================================*/
 
 void TestD()
 {
 	int i=0;
+
 	while (1)
 	{
-		printf("D");
+		//printf("%d",get_ticks()%4);
 		milli_delay(1000);
 	}
 }
@@ -396,9 +966,10 @@ void TestD()
 void TestE()
 {
 	int i=0;
+
 	while (1)
 	{
-		printf("E");
+		//printf("E");
 		milli_delay(1000);
 	}
 }
@@ -408,6 +979,7 @@ void TestE()
 
 void ASand()
 {
+	sys_clear(tty_table+3);
 	printf("Caesar's code ! Please input 3 strings :\nyour original message, your gap, and your purpose(encode/decode).\n");
 	while(1){
 		printf("\nStart !\n");
@@ -417,7 +989,7 @@ void ASand()
 
 		char strrrrr[255];
 
-		TTY *p_tty=tty_table+5;
+		TTY *p_tty=tty_table+3;
 		p_tty->startScanf=0;
 		strrrrr[255];
 		openStartScanf(p_tty);
@@ -425,7 +997,7 @@ void ASand()
 		mystrncpy(message,p_tty->str,255);
 		//printf(message);
 
-		p_tty=tty_table+5;
+		p_tty=tty_table+3;
 		p_tty->startScanf=0;
 		strrrrr[255];
 		openStartScanf(p_tty);
@@ -433,7 +1005,7 @@ void ASand()
 		mystrncpy(gap,p_tty->str,20);
 		//printf(gap);
 
-		p_tty=tty_table+5;
+		p_tty=tty_table+3;
 		p_tty->startScanf=0;
 		strrrrr[255];
 		openStartScanf(p_tty);
@@ -739,7 +1311,8 @@ void printHex(const int a){
 
 void Yume()
 {	
-	printf("\nThis Program Can Calculate The MD5 Of A String For You !\n");
+	sys_clear(tty_table+4);
+	printf("This Program Can Calculate The MD5 Of A String For You !\n");
 	while(1){
 		printf("Please Input Your String:\n");
 		char s[255];
@@ -790,8 +1363,8 @@ void initDates(){
 
 void TestB()
 {
+	sys_clear(tty_table+1);
 	printf("Please input the beginning and the ending date:\n  like: yyyy mm dd yyyy mm dd\n");
-
 	while(1){
 		initDates();
 		TTY *p_tty=tty_table+1;

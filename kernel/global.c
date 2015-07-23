@@ -23,10 +23,8 @@ PUBLIC	TASK	task_table[NR_TASKS] = {{task_tty, STACK_SIZE_TTY, "tty"}};
 PUBLIC	TASK	user_proc_table[NR_PROCS] = {	{Terminal, STACK_SIZE_TERMINAL, "Terminal"},
 						{TestB, STACK_SIZE_TESTB, "TestB"},
 						{TestC, STACK_SIZE_TESTC, "TestC"},
-						{TestD, STACK_SIZE_TESTD, "TestD"},
-						{TestE, STACK_SIZE_TESTE, "TestE"},
-						{Yume, STACK_SIZE_YUME, "Yume"},
-						{ASand, STACK_SIZE_ASAND, "ASand"}};
+						{ASand, STACK_SIZE_ASAND, "ASand"},
+						{Yume, STACK_SIZE_YUME, "Yume"}};
 
 PUBLIC	char	task_stack[STACK_SIZE_TOTAL];
 

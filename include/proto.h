@@ -31,10 +31,8 @@ PUBLIC void	restart();
 PUBLIC void	Terminal();
 PUBLIC void	TestB();
 PUBLIC void	TestC();
-PUBLIC void 	TestD();
-PUBLIC void 	TestE();
-PUBLIC void  	clearScreen();
-PUBLIC void 	Yume();
+PUBLIC void clearScreen();
+PUBLIC void Yume();
 PUBLIC void	ASand();
 
 /* i8259.c */

@@ -14,9 +14,9 @@
 EXTERN	int		ticks;
 
 EXTERN	int		disp_pos;
-EXTERN	t_8		gdt_ptr[7];	// 0~15:Limit  16~47:Base
+EXTERN	t_8		gdt_ptr[5];	// 0~15:Limit  16~47:Base
 EXTERN	DESCRIPTOR	gdt[GDT_SIZE];
-EXTERN	t_8		idt_ptr[7];	// 0~15:Limit  16~47:Base
+EXTERN	t_8		idt_ptr[5];	// 0~15:Limit  16~47:Base
 EXTERN	GATE		idt[IDT_SIZE];
 
 EXTERN	t_32		k_reenter;
